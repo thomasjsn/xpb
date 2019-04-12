@@ -48,7 +48,7 @@ $ redis-cli -n <db-id> set about $(cat readme.md)
 ```
 
 ## Change syntax language
-Add `/`and the syntax language to the paste URL:
+Add `/` and the syntax language to the paste URL:
 ```
 "https://p.uctrl.net/6tmitq/md"
 ```
