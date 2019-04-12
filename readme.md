@@ -1,5 +1,5 @@
 # µPaste
-µPaste (micro paste) is a dead simple pastebin, built with [Lumen](https://lumen.laravel.com/).
+µPaste (micro paste) is a dead simple pastebin and URL shortener, built with [Lumen](https://lumen.laravel.com/).
 
 > This is still very much a work in progress, use at own risk.
 
@@ -30,7 +30,7 @@ Package `jq` required for json decoding.
 
 Usage:
 ```
-$ cat my-image.jpg | upaste
+$ cat rpi-project.py | upaste
 ```
 
 Response:
@@ -55,7 +55,7 @@ Add `/` and the syntax language to the paste URL:
 https://p.uctrl.net/6tmitq/md
 ```
 
-List of available languages here: https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html#language-names-and-aliases
+List of available languages here: https://p.uctrl.net/syntax /[source](https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html#language-names-and-aliases)
 
 ## License
 µPaste is open-sourced software licensed under the [MIT license](LICENSE).

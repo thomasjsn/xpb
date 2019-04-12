@@ -35,7 +35,7 @@ class PasteController extends Controller
         }
 
         Redis::set($hash, $content);
-        Redis::expire($hash, 31536000);
+        Redis::expire($hash, 3600*24*30);
 
 		$response = [
             'status' => 'ok',
@@ -65,7 +65,7 @@ class PasteController extends Controller
 
         // Dont expire "protected" pastes
         if (! in_array($hash, ['about', 'syntax'])) {
-            Redis::expire($hash, 31536000);
+            Redis::expire($hash, 3600*24*90);
         }
 
         // Redirect instead if paste is valid URL
@@ -74,7 +74,7 @@ class PasteController extends Controller
         }
 
         return response(view('paste', compact('content', 'syntax')))
-            ->header('Cache-Control', 'public, max-age=604800');
+            ->header('Cache-Control', 'public, max-age=' . 3600*24*7);
     }
 
 
