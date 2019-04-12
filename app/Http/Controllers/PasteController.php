@@ -25,6 +25,7 @@ class PasteController extends Controller
 
         $content = file_get_contents($file);
 
+        // Make sure pasts are not too big
         if (strlen($content) > 400000) {
             return response()->json([
                 'status' => 'error',
@@ -62,9 +63,12 @@ class PasteController extends Controller
 
         if (is_null($content)) abort(404);
 
-        Redis::expire($hash, 31536000);
+        // Dont expire "protected" pastes
+        if (! in_array($hash, ['about', 'syntax'])) {
+            Redis::expire($hash, 31536000);
+        }
 
-
+        // Redirect instead if paste is valid URL
         if (filter_var(trim($content), FILTER_VALIDATE_URL)) {
             return redirect(trim($content));
         }
