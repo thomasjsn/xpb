@@ -8,6 +8,12 @@
         <title>µPaste</title>
         <link rel="stylesheet" href="/styles/solarized-dark.css">
         <script src="/highlight.pack.js"></script>
+
+        <style>
+            pre {
+                white-space: pre-wrap;
+            }
+        </style>
     </head>
 
     <body @if(! in_array($syntax, ["plain", "text", "nohighlight"])) bgcolor="#002b36" @endif>

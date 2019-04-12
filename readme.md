@@ -17,6 +17,8 @@
 TBD
 
 ## Add paste
+If paste is a URL; µPaste will redirect instead of showing the content — acting as a URL shortener.
+
 ### Alias
 Put this in your `.bashrc` or `.zshrc`:
 ```
@@ -28,7 +30,7 @@ Package `jq` required for json decoding.
 
 Usage:
 ```
-$ cat my-image.jpg | uimg
+$ cat my-image.jpg | upaste
 ```
 
 Response:
@@ -50,7 +52,7 @@ $ redis-cli -n <db-id> set about $(cat readme.md)
 ## Change syntax language
 Add `/` and the syntax language to the paste URL:
 ```
-"https://p.uctrl.net/6tmitq/md"
+https://p.uctrl.net/6tmitq/md
 ```
 
 List of available languages here: https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html#language-names-and-aliases

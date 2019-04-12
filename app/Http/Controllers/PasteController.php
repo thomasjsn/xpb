@@ -64,9 +64,13 @@ class PasteController extends Controller
 
         Redis::expire($hash, 31536000);
 
-        return response(view('paste', compact('content', 'syntax')));
-#            ->header('Cache-Control', config('uimg.cache_header.home'));
 
+        if (filter_var(trim($content), FILTER_VALIDATE_URL)) {
+            return redirect(trim($content));
+        }
+
+        return response(view('paste', compact('content', 'syntax')))
+            ->header('Cache-Control', 'public, max-age=604800');
     }
 
 
