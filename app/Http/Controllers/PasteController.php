@@ -47,6 +47,15 @@ class PasteController extends Controller
     }
 
 
+    public function index()
+    {
+        $content = Redis::get('about');
+        $syntax = 'md';
+
+        return response(view('paste', compact('content', 'syntax')));
+    }
+
+
     public function show($hash, $syntax = null)
     {
         $content = Redis::get($hash);
@@ -55,7 +64,7 @@ class PasteController extends Controller
 
         Redis::expire($hash, 31536000);
 
-        return response(view('paste', compact('paste', 'content', 'syntax')));
+        return response(view('paste', compact('content', 'syntax')));
 #            ->header('Cache-Control', config('uimg.cache_header.home'));
 
     }

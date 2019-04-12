@@ -11,9 +11,7 @@
 |
 */
 
-$router->get('/', function () use ($router) {
-    return 'Hello world!';
-});
+$router->get('/', [ 'uses' => 'PasteController@index' ]);
 
 # Show
 $router->get('/{hash}[/{syntax}]', [ 'uses' => 'PasteController@show' ]);
