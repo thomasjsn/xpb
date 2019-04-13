@@ -1,5 +1,5 @@
-# µPaste
-µPaste (micro paste) is a dead simple pastebin and URL shortener, built with [Lumen](https://lumen.laravel.com/).
+# xpb
+xpb is a dead simple pastebin and URL shortener, built with [Lumen](https://lumen.laravel.com/).
 
 > This is still very much a work in progress, use at own risk.
 
@@ -17,20 +17,20 @@
 TBD
 
 ## Add paste
-If paste is a URL; µPaste will redirect instead of showing the content — acting as a URL shortener.
+If paste is a URL; xpb will redirect instead of showing the content — acting as a URL shortener.
 
 ### Alias
 Put this in your `.bashrc` or `.zshrc`:
 ```
-upaste () {
-        curl -s -F "file=@${1:--}" https://p.uctrl.net/paste | jq
+xpb () {
+        curl -s -F "file=@${1:--}" https://xpb.no/paste | jq
 }
 ```
 Package `jq` required for json decoding.
 
 Usage:
 ```
-$ cat rpi-project.py | upaste
+$ cat rpi-project.py | xpb
 ```
 
 Response:
@@ -39,7 +39,7 @@ Response:
   "status": "ok",
   "message": "Paste successfully created",
   "length": 1759,
-  "url": "https://p.uctrl.net/6tmitq"
+  "url": "https://xpb.no/6tmitq"
 }
 ```
 
@@ -52,10 +52,10 @@ $ redis-cli -n <db-id> set about $(cat readme.md)
 ## Change syntax language
 Add `/` and the syntax language to the paste URL:
 ```
-https://p.uctrl.net/6tmitq/md
+https://xpb.no/6tmitq/md
 ```
 
-List of available languages here: https://p.uctrl.net/syntax /[source](https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html#language-names-and-aliases)
+List of available languages here: https://xpb.no/syntax (redirects to [highlight.js docs](https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html#language-names-and-aliases))
 
 ## License
-µPaste is open-sourced software licensed under the [MIT license](LICENSE).
+xpb is open-sourced software licensed under the [MIT license](LICENSE).
