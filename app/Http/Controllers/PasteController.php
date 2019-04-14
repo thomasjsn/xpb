@@ -35,7 +35,7 @@ class PasteController extends Controller
         }
 
         Redis::set($hash, $content);
-        Redis::expire($hash, 3600*24*30);
+        Redis::expire($hash, 3600*24*90);
 
 		$response = [
             'status' => 'ok',
