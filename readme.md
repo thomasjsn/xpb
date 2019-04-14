@@ -46,7 +46,7 @@ Response:
 ### Using `redis-cli`
 With this you can set the keys manually:
 ```
-$ redis-cli -n <db-id> set about $(cat readme.md)
+$ redis-cli -n <db-id> set about "$(cat readme.md)"
 ```
 
 ## Change syntax language
