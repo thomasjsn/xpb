@@ -58,7 +58,7 @@ https://xpb.no/6tmitq/md
 List of available languages here: https://xpb.no/syntax (redirects to [highlight.js docs](https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html#language-names-and-aliases))
 
 ## Expiration
-Pastes expire 90 days after they were last viewed, meaning that the expire time is kicked back on each view.
+Pastes are set to expire 90 days after initial post, this is kicked back to 90 days each time the paste is viewed.
 
 ## License
 xpb is open-sourced software licensed under the [MIT license](LICENSE).
