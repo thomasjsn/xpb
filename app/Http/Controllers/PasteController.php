@@ -23,15 +23,15 @@ class PasteController extends Controller
         $file = $request->file('file');
         $hash = $this->getNewHash();
 
-        $content = file_get_contents($file);
+        $content = trim(file_get_contents($file));
 
         // Make sure pasts are not too big
-        if (strlen($content) > 400000) {
+        if (strlen($content) > 400000 || strlen($content) == 0) {
             return response()->json([
                 'status' => 'error',
-                'error' => 413,
-                'message' => 'Too long'
-            ], 413);
+                'error' => 400,
+                'message' => 'Invalid paste length'
+            ], 400);
         }
 
         Redis::set($hash, $content);
