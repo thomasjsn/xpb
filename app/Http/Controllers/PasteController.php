@@ -57,6 +57,19 @@ class PasteController extends Controller
     }
 
 
+    public function stats()
+    {
+        $stats = [
+            'pastes' => Redis::dbsize()
+        ];
+
+        $content = json_encode($stats, JSON_PRETTY_PRINT);
+        $syntax = 'json';
+
+        return response(view('paste', compact('content', 'syntax')));
+    }
+
+
     public function show($hash, $syntax = null)
     {
         $content = Redis::get($hash);
