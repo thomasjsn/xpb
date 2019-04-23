@@ -16,7 +16,7 @@
         </style>
     </head>
 
-    <body @if(! in_array($syntax, ["plain", "text", "nohighlight"])) bgcolor="#002b36" @endif>
+    <body bgcolor="#002b36">
         <pre><code @if(!is_null($syntax)) class="{{ $syntax }}" @endif>{{ $content }}</code></pre>
 
         <script>hljs.initHighlightingOnLoad();</script>

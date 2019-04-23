@@ -76,12 +76,19 @@ class PasteController extends Controller
 
         if (is_null($content)) abort(404);
 
-        // Dont expire "protected" pastes
-        if (! in_array($hash, ['about', 'syntax'])) {
+        // Kick back expire, if paste is volatile
+        if (Redis::ttl($hash) > -1) {
             Redis::expire($hash, 3600*24*90);
         }
 
-        // Redirect instead if paste is valid URL
+        // Return plain text, if syntax says so
+        if (in_array($syntax, ['raw', 'plain', 'text', 'nohighlight'])) {
+            return response($content, 200)
+                ->header('Content-Type', 'text/plain')
+                ->header('Cache-Control', 'public, max-age=' . 3600*24*7);
+        }
+
+        // Redirect instead, if paste is valid URL
         if (filter_var(trim($content), FILTER_VALIDATE_URL)) {
             return redirect(trim($content));
         }
