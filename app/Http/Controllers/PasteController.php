@@ -44,6 +44,8 @@ class PasteController extends Controller
             'url' => config('app.url') . '/' . $hash
         ];
 
+        \Log::info('Paste successfully created', ['paste' => $hash]);
+
         return response()->json($response, 201);
     }
 
