@@ -5,7 +5,7 @@ xpb is a dead simple pastebin and URL shortener, built with [Lumen](https://lume
 
 ## Features
 * Redis database
-* Deletes pastes not accessed in 90 days
+* Deletes pastes not accessed in 180 days
 * Syntax highlighting with overrideable language
 
 ## Requirements
@@ -69,7 +69,7 @@ List of available languages here: https://xpb.no/syntax (redirects to [highlight
 * `stats`: returns a json paste with statistics
 
 ## Expiration
-Pastes are set to expire 90 days after initial post, this is kicked back to 90 days each time the paste is viewed (unless the paste is persistent).
+Pastes are set to expire 90 days after initial post, this is kicked back 180 days each time the paste is viewed (unless the paste is persistent).
 
 ## License
 xpb is open-sourced software licensed under the [MIT license](LICENSE).
