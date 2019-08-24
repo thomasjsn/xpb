@@ -23,7 +23,7 @@ If paste is a URL; xpb will redirect instead of showing the content — acting a
 Put this in your `.bashrc` or `.zshrc`:
 ```
 xpb () {
-        curl -s -F "file=@${1:--}" https://xpb.no/paste | jq
+        curl -s -F "file=@${1:--}" https://example.com/paste | jq
 }
 ```
 Package `jq` required for json decoding.
@@ -39,7 +39,7 @@ Response:
   "status": "ok",
   "message": "Paste successfully created",
   "length": 1759,
-  "url": "https://xpb.no/6tmitq"
+  "url": "https://example.com/6tmitq"
 }
 ```
 
@@ -57,12 +57,12 @@ $ redis-cli -n <db-id> persist <paste-key>
 ## Change syntax language
 Add `/` and the syntax language to the paste URL:
 ```
-https://xpb.no/6tmitq/md
+https://example.com/6tmitq/md
 ```
 
 Use syntax `raw` to return a plain text document.
 
-List of available languages here: https://xpb.no/syntax (redirects to [highlight.js docs](https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html#language-names-and-aliases))
+List of available languages here: https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html#language-names-and-aliases
 
 ## Special keys/URLs
 * `about`: shown on the homepage
