@@ -9,12 +9,21 @@ xpb is a dead simple pastebin and URL shortener, built with [Lumen](https://lume
 * Syntax highlighting with overrideable language
 
 ## Requirements
+* PHP >= 7.1.3
 * nginx (not tested with Apache)
 * Redis-server
-* Everything else that [Lumen](https://lumen.laravel.com/) needs
 
 ## Install
-TBD
+Packages required:
+
+* nginx
+* php7.x
+* php7.x-mbstring
+* php7.x-xml
+* php7.x-zip
+* redis-server
+* composer
+* unzip
 
 ## Add paste
 If paste is a URL; xpb will redirect instead of showing the content — acting as a URL shortener.
