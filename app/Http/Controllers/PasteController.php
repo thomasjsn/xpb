@@ -35,7 +35,7 @@ class PasteController extends Controller
         }
 
         Redis::set($hash, $content);
-        Redis::expire($hash, 3600*24*90);
+        Redis::expire($hash, 3600*24*180);
 
 		$response = [
             'status' => 'ok',
@@ -80,7 +80,7 @@ class PasteController extends Controller
 
         // Kick back expire, if paste is volatile
         if (Redis::ttl($hash) > -1) {
-            Redis::expire($hash, 3600*24*180);
+            Redis::expire($hash, 3600*24*365*3);
         }
 
         // Return plain text, if syntax says so
