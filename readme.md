@@ -82,3 +82,6 @@ Pastes are set to expire 180 days after initial post, this is kicked back to 3 y
 
 ## License
 xpb is open-sourced software licensed under the [MIT license](LICENSE).
+
+## Author
+[Thomas Jensen](https://thomas.stdout.no)
