@@ -69,7 +69,7 @@ Add `/` and the syntax language to the paste URL:
 https://example.com/6tmitq/md
 ```
 
-Use syntax `raw` to return a plain text document.
+Use syntax `raw` to return a plain text document, `jpeg` or `png` to return images.
 
 List of available languages here: https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html#language-names-and-aliases
 
