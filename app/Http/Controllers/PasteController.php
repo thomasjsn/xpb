@@ -89,6 +89,11 @@ class PasteController extends Controller
                 ->header('Content-Type', 'text/plain')
                 ->header('Cache-Control', 'public, max-age=' . 3600*24*7);
         }
+        else if (in_array($syntax, ['jpeg', 'png'])) {
+            return response($content, 200)
+                ->header('Content-Type', 'image/' . $syntax)
+                ->header('Cache-Control', 'public, max-age=' . 3600*24*7);
+        }
 
         // Redirect instead, if paste is valid URL
         if (filter_var(trim($content), FILTER_VALIDATE_URL)) {
