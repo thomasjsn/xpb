@@ -15,7 +15,7 @@ class Controller extends BaseController
 		while(1)
 		{
             $hash = $this->generateString($permitted_chars, $length);
-            if (is_null(Redis::get($hash))) return $hash;
+            if (is_null(Redis::get($hash)) && is_null(Redis::hget('urls:hashid', $hash))) return $hash;
 			$length++;
 		}
 	}

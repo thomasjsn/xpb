@@ -13,7 +13,10 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        Commands\PasteCheckCommand::class,
+        Commands\PasteListCommand::class,
+        Commands\UrlDeleteCommand::class,
+        Commands\UrlListCommand::class
     ];
 
     /**

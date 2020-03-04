@@ -1,11 +1,11 @@
 # xpb
-xpb is a dead simple pastebin and URL shortener, built with [Lumen](https://lumen.laravel.com/).
+xpb is a pretty simple pastebin and URL shortener, built with [Lumen](https://lumen.laravel.com/).
 
 > This is still very much a work in progress, use at own risk.
 
 ## Features
 * Redis database
-* Deletes pastes not accessed in 3 years
+* Pasts expire if not access within TTL setting
 * Syntax highlighting with overrideable language
 
 ## Requirements
@@ -28,6 +28,13 @@ Packages required:
 ## Add paste
 If paste is a URL; xpb will redirect instead of showing the content — acting as a URL shortener.
 
+Parameters:
+* `file`: paste content (required)
+* `mime`: specify content mime, like `image/jpeg`
+* `ttl`: set time to live, in seconds
+* `hlen`: hash key length, default: 6
+* `hash`: set custom hash key
+
 ### Alias
 Put this in your `.bashrc` or `.zshrc`:
 ```
@@ -48,19 +55,49 @@ Response:
   "status": "ok",
   "message": "Paste successfully created",
   "length": 1759,
+  "mime": "text/plain",
+  "ttl": 15552000,
+  "ttl_d": 180,
+  "is_link": false,
   "url": "https://example.com/6tmitq"
 }
 ```
 
-### Using `redis-cli`
-With this you can set the keys manually:
+### Image upload
+Upload image with 7 days TTL, copy url to clipboard.
+
 ```
-$ redis-cli -n <db-id> set about "$(cat readme.md)"
+IMG=$1
+MIME=`file -b --mime-type "$IMG"`
+TTL=`echo 3600*24*7 | bc`
+
+URL=`curl -s -F "file=@$IMG" -F "mime=$MIME" \
+    https://example.com/paste`
+
+echo $URL | jq
+echo $URL | jq -r .url | xclip -i -sel clipboard
 ```
 
-Or make pastes persistent:
+### Python script
+Usage: `echo "test" | xpb.py --ttl 0`
+
 ```
-$ redis-cli -n <db-id> persist <paste-key>
+import argparse, sys, requests, json
+
+parser=argparse.ArgumentParser()
+
+parser.add_argument('--mime', help='Specify content mime')
+parser.add_argument('--ttl', help='Content expire, 0 = never')
+parser.add_argument('--hlen', help='Set hash key length')
+parser.add_argument('--hash', help='Set custom hash key')
+
+args=parser.parse_args()
+
+url = 'https://example.com/paste'
+r = requests.post(url, files={'file': sys.stdin}, data=vars(args))
+
+print(json.dumps(r.json(), indent=2))
+
 ```
 
 ## Change syntax language
@@ -69,7 +106,7 @@ Add `/` and the syntax language to the paste URL:
 https://example.com/6tmitq/md
 ```
 
-Use syntax `raw` to return a plain text document, `jpeg` or `png` to return images.
+Use syntax `raw` to return a plain text document.
 
 List of available languages here: https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html#language-names-and-aliases
 
@@ -77,8 +114,12 @@ List of available languages here: https://highlightjs.readthedocs.io/en/latest/c
 * `about`: shown on the homepage
 * `stats`: returns a json paste with statistics
 
-## Expiration
-Pastes are set to expire 180 days after initial post, this is kicked back to 3 years each time the paste is viewed (unless the paste is persistent).
+## Retention
+Retention is calculated with this formula, from https://0x0.st/
+
+   retention = min_age + (-max_age + min_age) * pow((file_size / max_size - 1), 3)
+
+Pastes are set to expire according to the above calculation after initial post, unless `ttl` is set in POST request. This is kicked back each time the paste is viewed (unless the paste is persistent).
 
 ## License
 xpb is open-sourced software licensed under the [MIT license](LICENSE).

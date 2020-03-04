@@ -12,6 +12,7 @@
 */
 
 $router->get('/', [ 'uses' => 'PasteController@index' ]);
+$router->get('/about', [ 'uses' => 'PasteController@index' ]);
 $router->get('/stats', [ 'uses' => 'PasteController@stats' ]);
 
 # Show
