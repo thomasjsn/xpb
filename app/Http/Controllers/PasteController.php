@@ -92,6 +92,7 @@ class PasteController extends Controller
             'status' => $status[0],
             'message' => $status[1],
             'length' => strlen($content),
+            'size' => $this->formatBytes(strlen($content)),
             'mime' => $mime ?? 'text/plain',
             'ttl' => Redis::ttl($hash),
             'ttl_d' => round(Redis::ttl($hash) / (3600*24), 1),
@@ -113,10 +114,23 @@ class PasteController extends Controller
 
     public function stats()
     {
+        $dates = [
+            date('Y-m', strtotime('0 month')),
+            date('Y-m', strtotime('-1 month')),
+            date('Y-m', strtotime('-2 month')),
+        ];
+
+        $traffic = [];
+
+        foreach($dates as $date) {
+            $traffic[$date] = $this->formatBytes(Redis::zscore('meta:traffic', $date));
+        }
+
         $stats = [
-            'pastes' => Redis::dbsize() - 4,
-            'links' => Redis::hlen('urls:hashid'),
-            'hashids' => Redis::scard('meta:hashid')
+            'paste_count' => Redis::dbsize() > 5 ? Redis::dbsize() - 5 : 0,
+            'link_count' => Redis::hlen('urls:hashid'),
+            'used_keys' => Redis::scard('meta:hashid'),
+            'traffic' => $traffic
         ];
 
         $content = json_encode($stats, JSON_PRETTY_PRINT);
@@ -155,6 +169,10 @@ class PasteController extends Controller
         $meta_json = json_decode($meta);
         $mime = $meta_json->mime ?? null;
         $ttl = $meta_json->ttl ?? 3600*24*180;
+
+        // Store some stats
+        Redis::zincrby('meta:visits', 1, $hash);
+        Redis::zincrby('meta:traffic', strlen($content), date('Y-m'));
 
         // Kick back expire, if paste is volatile
         if (Redis::ttl($hash) > -1) {

@@ -35,10 +35,14 @@ class PasteCheckCommand extends Command
         {
             if (!in_array($file, ['.', '..', '.gitignore'])) {
                 if (Redis::exists($file)) {
-                    $this->info('Found metadata for content file: ' . $file);
+                    $this->line('Found metadata for content file: ' . $file);
                 } else {
-                    $this->error('Content expired, deleting file: ' . $file);
+                    $this->info('Content expired, deleting file: ' . $file);
                     unlink(storage_path('app/'.$file));
+
+                    if(Redis::zrem('meta:visits', $file)) {
+                        $this->comment('Paste visits deleted for: ' . $file);
+                    }
                 }
             } 
         }

@@ -55,6 +55,7 @@ Response:
   "status": "ok",
   "message": "Paste successfully created",
   "length": 1759,
+  "size": "1.72 KiB"
   "mime": "text/plain",
   "ttl": 15552000,
   "ttl_d": 180,

@@ -40,6 +40,9 @@ class PasteDeleteCommand extends Command
         if(Redis::del($hash)) {
             $this->info('Paste metadata deleted.');
         }
+        if(Redis::zrem('meta:visits', $hash)) {
+            $this->info('Paste visits deleted.');
+        }
 
         if($this->option('release') && Redis::srem('meta:hashid', $hash)) {
             $this->info('Hash key released.');
