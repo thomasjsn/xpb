@@ -38,7 +38,7 @@ class PasteController extends Controller
         $hash = $request->get('hash') ?? $this->getNewHash($hlen);
 
         // Make sure hash is available
-        if (Redis::exists($hash) || Redis::hexists('urls:hashid', $hash)) {
+        if (Redis::exists($hash) || Redis::sismember('meta:hashid', $hash)) {
             return response()->json([
                 'status' => 'error',
                 'error' => 409,
@@ -63,6 +63,7 @@ class PasteController extends Controller
                 'ttl' => $ttl
             ]));
             if ($ttl > 0) Redis::expire($hash, $ttl);
+            $status = ['ok', 'Paste successfully created'];
         }
         else {
             $urlHash = Redis::hget('urls:chksum', md5($content));
@@ -70,10 +71,15 @@ class PasteController extends Controller
             if (is_null($urlHash)) {
                 Redis::hset('urls:hashid', $hash, $content);
                 Redis::hset('urls:chksum', md5($content), $hash);
+                $status = ['ok', 'Link successfully created'];
             } else {
                 $hash = $urlHash;
+                $status = ['found', 'Link found, returning existing data'];
             }
         }
+
+        // Store the hash ID so it can not be used again
+        Redis::sadd('meta:hashid', $hash);
 
         $url = sprintf('https://%s/%s', $request->getHost(), $hash);
 
@@ -83,8 +89,8 @@ class PasteController extends Controller
         }
 
 		$response = [
-            'status' => 'ok',
-            'message' => 'Paste successfully created',
+            'status' => $status[0],
+            'message' => $status[1],
             'length' => strlen($content),
             'mime' => $mime ?? 'text/plain',
             'ttl' => Redis::ttl($hash),
@@ -99,20 +105,18 @@ class PasteController extends Controller
     }
 
 
-    public function index()
+    public function index(Request $request)
     {
-        $content = file_get_contents(base_path('readme.md'));
-        $syntax = 'md';
-
-        return response(view('paste', compact('content', 'syntax')));
+        return $this->show($request, 'home');
     }
 
 
     public function stats()
     {
         $stats = [
-            'pastes' => Redis::dbsize() - 3,
-            'urls' => Redis::hlen('urls:hashid')
+            'pastes' => Redis::dbsize() - 4,
+            'links' => Redis::hlen('urls:hashid'),
+            'hashids' => Redis::scard('meta:hashid')
         ];
 
         $content = json_encode($stats, JSON_PRETTY_PRINT);

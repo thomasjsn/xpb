@@ -10,12 +10,12 @@ class Controller extends BaseController
 
 	protected function getNewHash($length = 6)
     {
-        $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
+        $permitted_chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 
 		while(1)
 		{
             $hash = $this->generateString($permitted_chars, $length);
-            if (is_null(Redis::get($hash)) && is_null(Redis::hget('urls:hashid', $hash))) return $hash;
+            if (! Redis::exists($hash) && ! Redis::sismember('meta:hashid', $hash)) return $hash;
 			$length++;
 		}
 	}

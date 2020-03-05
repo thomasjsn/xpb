@@ -14,6 +14,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\PasteCheckCommand::class,
+        Commands\PasteDeleteCommand::class,
         Commands\PasteListCommand::class,
         Commands\UrlDeleteCommand::class,
         Commands\UrlListCommand::class
