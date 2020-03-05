@@ -114,6 +114,13 @@ List of available languages here: https://github.com/highlightjs/highlight.js/bl
 * `home`: shown on the homepage
 * `stats`: returns a json paste with statistics
 
+### Redis system keys
+* `meta:hashid`
+* `meta:traffic`
+* `urls:hashid`
+* `urls:visits`
+* `urls:chksum`
+
 ## Retention
 Retention is calculated with this formula, from https://0x0.st/
 
