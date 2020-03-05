@@ -29,7 +29,7 @@ class UrlListCommand extends Command
      */
     public function handle()
     {
-        $hgetall = Redis::hgetall('urls');
+        $hgetall = Redis::hgetall('urls:hashid');
 
         $urls = array_map(function ($hash, $url) {
             $visits = Redis::zscore('urls:visits', $hash);

@@ -30,10 +30,16 @@ class UrlDeleteCommand extends Command
     public function handle()
     {
         $hash = $this->argument('hash');
-        $url = Redis::hget('urls', $hash);
+        $url = Redis::hget('urls:hashid', $hash);
 
-        Redis::hdel('urls', $hash);
-        Redis::zrem('urls:visits', $hash);
-        Redis::hdel('urls:chksum', md5($url));
+        if(Redis::hdel('urls:hashid', $hash)) {
+            $this->info('URL hashid deleted.');
+        }
+        if(Redis::zrem('urls:visits', $hash)) {
+            $this->info('URL visits deleted.');
+        }
+        if(Redis::hdel('urls:chksum', md5($url))) {
+            $this->info('URL checksum deleted.');
+        }
     }
 }
