@@ -69,7 +69,6 @@ Upload image with 7 days TTL, copy url to clipboard.
 ```
 IMG=$1
 MIME=`file -b --mime-type "$IMG"`
-TTL=`echo 3600*24*7 | bc`
 
 URL=`curl -s -F "file=@$IMG" -F "mime=$MIME" \
     https://example.com/paste`
@@ -108,10 +107,10 @@ https://example.com/6tmitq/md
 
 Use syntax `raw` to return a plain text document.
 
-List of available languages here: https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html#language-names-and-aliases
+List of available languages here: https://github.com/highlightjs/highlight.js/blob/master/SUPPORTED_LANGUAGES.md
 
 ## Special keys/URLs
-* `about`: shown on the homepage
+* `home`: shown on the homepage
 * `stats`: returns a json paste with statistics
 
 ## Retention

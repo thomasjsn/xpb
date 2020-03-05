@@ -43,9 +43,9 @@ class PasteListCommand extends Command
                 $pastes[] = [
                     'hash' => $file,
                     'length' => $length,
-                    'size_mb' => round($length / (1024*1024), 3),
+                    'size_mb' => round($length / (1024*1024), 2),
                     'mime' => $meta_json->mime,
-                    'ttl_d' => round($meta_json->ttl / (3600*24), 2),
+                    'ttl_d' => round(Redis::ttl($file) / (3600*24), 1) . " of " . round($meta_json->ttl / (3600*24), 1),
                     'timestamp' => Carbon::createFromTimestamp(filectime(storage_path('app/'.$file)))->diffForHumans()
                 ];
             } 
