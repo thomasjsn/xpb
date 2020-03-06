@@ -116,6 +116,7 @@ List of available languages here: https://github.com/highlightjs/highlight.js/bl
 
 ### Redis system keys
 * `meta:hashid`
+* `meta:visits`
 * `meta:traffic`
 * `urls:hashid`
 * `urls:visits`

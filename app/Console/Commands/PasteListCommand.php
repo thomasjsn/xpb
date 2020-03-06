@@ -43,16 +43,17 @@ class PasteListCommand extends Command
                 $pastes[] = [
                     'hash' => $file,
                     'length' => $length,
-                    'size_mb' => round($length / (1024*1024), 2),
+                    'size' => round($length / (1024*1024), 2),
                     'mime' => $meta_json->mime,
-                    'ttl_d' => round(Redis::ttl($file) / (3600*24), 1) . " of " . round($meta_json->ttl / (3600*24), 1),
+                    'ttl' => round(Redis::ttl($file) / (3600*24), 1),
+                    'retention' => round($meta_json->ttl / (3600*24), 1),
                     'timestamp' => Carbon::createFromTimestamp(filectime(storage_path('app/'.$file)))->diffForHumans(),
                     'hits' => Redis::zscore('meta:visits', $file)
                 ];
             } 
         }
 
-        $headers = ['Hash', 'Length', 'Size_MB', 'MIME', 'TTL_d', 'Timestamp', 'Hits'];
+        $headers = ['Hash', 'Length', 'Size (MB)', 'MIME', 'TTL (d)', 'Retention', 'Timestamp', 'Hits'];
         $this->table($headers, $pastes);
     }
 }

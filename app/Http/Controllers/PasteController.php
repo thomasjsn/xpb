@@ -121,13 +121,12 @@ class PasteController extends Controller
         ];
 
         $traffic = [];
-
         foreach($dates as $date) {
             $traffic[$date] = $this->formatBytes(Redis::zscore('meta:traffic', $date));
         }
 
         $stats = [
-            'paste_count' => Redis::dbsize() > 5 ? Redis::dbsize() - 5 : 0,
+            'paste_count' => Redis::dbsize() > 6 ? Redis::dbsize() - 6 : 0,
             'link_count' => Redis::hlen('urls:hashid'),
             'used_keys' => Redis::scard('meta:hashid'),
             'traffic' => $traffic
@@ -159,9 +158,8 @@ class PasteController extends Controller
         $urlDomains = explode(' ', env('URL_DOMAINS'));
         if (in_array($request->getHost(), $urlDomains)) abort(404);
 
-        // If the hash key doesn't have a file, delete it and return 404
+        // If the hash key doesn't have a file return 404
         if (! file_exists(storage_path('app/'.$hash))) {
-            Redis::del($hash);
             abort(404);
         }
 
