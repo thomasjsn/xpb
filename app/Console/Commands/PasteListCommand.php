@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Paste;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
@@ -33,27 +34,29 @@ class PasteListCommand extends Command
         $files = scandir(storage_path('app'));
         $pastes = [];
 
-        foreach ($files as $file)
+        foreach ($files as $hash)
         {
-            if (!in_array($file, ['.', '..', '.gitignore'])) {
-                $meta = Redis::get($file);
-                $meta_json = json_decode($meta);
-                $length = filesize(storage_path('app/'.$file));
+            if (! in_array($hash, ['.', '..', '.gitignore'])) {
+                $paste = Paste::find(str_replace('!', '/', $hash));
+
+                if (is_null($paste)) {
+                    continue;
+                }
 
                 $pastes[] = [
-                    'hash' => $file,
-                    'length' => $length,
-                    'size' => round($length / (1024*1024), 2),
-                    'mime' => $meta_json->mime,
-                    'ttl' => round(Redis::ttl($file) / (3600*24), 1),
-                    'retention' => round($meta_json->ttl / (3600*24), 1),
-                    'timestamp' => Carbon::createFromTimestamp(filectime(storage_path('app/'.$file)))->diffForHumans(),
-                    'hits' => Redis::zscore('meta:visits', $file)
+                    'hash' => $paste->hash,
+                    'length' => $paste->length,
+                    'size' => $paste->size,
+                    'mime' => $paste->mime ?? '-',
+                    'ttl' => round(Redis::ttl($paste->hash) / (3600*24), 1),
+                    'retention' => round($paste->ttl / (3600*24), 1),
+                    'timestamp' => Carbon::createFromTimestamp($paste->timestamp)->diffForHumans(),
+                    'hits' => $paste->hits
                 ];
             } 
         }
 
-        $headers = ['Hash', 'Length', 'Size (MB)', 'MIME', 'TTL (d)', 'Retention', 'Timestamp', 'Hits'];
+        $headers = ['Hash', 'Length', 'Size', 'MIME', 'TTL (d)', 'Retention', 'Timestamp', 'Hits'];
         $this->table($headers, $pastes);
     }
 }

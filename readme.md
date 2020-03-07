@@ -28,6 +28,9 @@ Packages required:
 ## Add paste
 If paste is a URL; xpb will redirect instead of showing the content — acting as a URL shortener.
 
+Headers:
+* `X-API-Key`: API key
+
 Parameters:
 * `file`: paste content (required)
 * `mime`: specify content mime, like `image/jpeg`
@@ -39,7 +42,7 @@ Parameters:
 Put this in your `.bashrc` or `.zshrc`:
 ```
 xpb () {
-        curl -s -F "file=@${1:--}" https://example.com/paste | jq
+  curl -s H "X-API-Key=key" -F "file=@${1:--}" https://example.com/paste | jq
 }
 ```
 Package `jq` required for json decoding.
@@ -53,13 +56,12 @@ Response:
 ```
 {
   "status": "ok",
-  "message": "Paste successfully created",
+  "type": "paste",
   "length": 1759,
   "size": "1.72 KiB"
   "mime": "text/plain",
   "ttl": 15552000,
-  "ttl_d": 180,
-  "is_link": false,
+  "retention": 180,
   "url": "https://example.com/6tmitq"
 }
 ```
@@ -71,7 +73,7 @@ Upload image with 7 days TTL, copy url to clipboard.
 IMG=$1
 MIME=`file -b --mime-type "$IMG"`
 
-URL=`curl -s -F "file=@$IMG" -F "mime=$MIME" \
+URL=`curl -s -H "X-API-Key=key" -F "file=@$IMG" -F "mime=$MIME" \
     https://example.com/paste`
 
 echo $URL | jq
@@ -94,33 +96,31 @@ parser.add_argument('--hash', help='Set custom hash key')
 args=parser.parse_args()
 
 url = 'https://example.com/paste'
-r = requests.post(url, files={'file': sys.stdin}, data=vars(args))
+key = 'key'
+
+r = requests.post(url,
+        files={'file': sys.stdin},
+        data=vars(args),
+        headers={'X-API-Key': key}
+        )
 
 print(json.dumps(r.json(), indent=2))
 
 ```
 
 ## Change syntax language
-Add `/` and the syntax language to the paste URL:
+Add `?` and the syntax language to the paste URL:
 ```
-https://example.com/6tmitq/md
+https://example.com/6tmitq?md
 ```
 
-Use syntax `raw` to return a plain text document.
+Use syntax `raw`, `plain`, or `text` to return a plain text document.
 
 List of available languages here: https://github.com/highlightjs/highlight.js/blob/master/SUPPORTED_LANGUAGES.md
 
 ## Special keys/URLs
 * `home`: shown on the homepage
 * `stats`: returns a json paste with statistics
-
-### Redis system keys
-* `meta:hashid`
-* `meta:visits`
-* `meta:traffic`
-* `urls:hashid`
-* `urls:visits`
-* `urls:chksum`
 
 ## Retention
 Retention is calculated with this formula, from https://0x0.st/

@@ -100,4 +100,5 @@ $app->router->group([
 
 $app->configure('app');
 $app->configure('database');
+$app->configure('xpb');
 return $app;

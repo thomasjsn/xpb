@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Paste;
+use App\ShortUrl;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redis;
 
@@ -20,87 +22,72 @@ class PasteController extends Controller
 
     public function create(Request $request)
     {
+        if (! Redis::hexists('sys:apikey', $request->header('X-API-Key'))) {
+            abort(403, 'Incorrect or missing API key');
+        }
+
         $file = $request->file('file');
         $content = trim(file_get_contents($file));
 
-        $is_link = (bool)filter_var(trim($content), FILTER_VALIDATE_URL);
-
-        $min_age = 3600*24*7;
-        $max_age = 3600*24*180;
-        $max_size = 1024*1024*8;
-
-        // From https://github.com/lachs0r/0x0
-        $retention = $min_age + (-$max_age + $min_age) * pow((strlen($content) / $max_size - 1), 3);
-
-        $mime = $request->get('mime');
-        $ttl = $request->get('ttl') ?? round($retention, 0);
         $hlen = $request->get('hlen') ?? 6;
         $hash = $request->get('hash') ?? $this->getNewHash($hlen);
 
+        // Limits
+        $min_age = config('xpb.limits.min_age');
+        $max_age = config('xpb.limits.max_age');
+        $max_size = config('xpb.limits.max_size');
+
         // Make sure hash is available
-        if (Redis::exists($hash) || Redis::sismember('meta:hashid', $hash)) {
-            return response()->json([
-                'status' => 'error',
-                'error' => 409,
-                'message' => 'Hash already exists'
-            ], 409);
+        if (Redis::exists($hash) || Redis::sismember('sys:hashid', $hash)) {
+            abort(409, 'Hash already exists');
         }
 
         // Make sure pasts are not too big
         if (strlen($content) > $max_size || strlen($content) == 0) {
-            return response()->json([
-                'status' => 'error',
-                'error' => 400,
-                'message' => 'Invalid paste length'
-            ], 400);
+            abort(400, 'Invalid paste length');
         }
 
-        if (! $is_link) {
-            file_put_contents(storage_path('app/'.$hash), $content);
-
-            Redis::set($hash, json_encode([
-                'mime' => $mime,
-                'ttl' => $ttl
-            ]));
-            if ($ttl > 0) Redis::expire($hash, $ttl);
-            $status = ['ok', 'Paste successfully created'];
+        // Check hash is valid
+        if (! $this->isValidHash($hash)) {
+            abort(400, 'Hash contains invalid character(s)');
         }
-        else {
-            $urlHash = Redis::hget('urls:chksum', md5($content));
 
-            if (is_null($urlHash)) {
-                Redis::hset('urls:hashid', $hash, $content);
-                Redis::hset('urls:chksum', md5($content), $hash);
-                $status = ['ok', 'Link successfully created'];
-            } else {
-                $hash = $urlHash;
-                $status = ['found', 'Link found, returning existing data'];
+        $is_link = (bool)filter_var(trim($content), FILTER_VALIDATE_URL);
+
+        try {
+            if ($is_link) {
+                $paste = ShortUrl::create([
+                    'hash' => $hash,
+                    'content' => $content
+                ]);
             }
-        }
+            else {
+                // From https://github.com/lachs0r/0x0
+                $retention = $min_age + (-$max_age + $min_age) * pow((strlen($content) / $max_size - 1), 3);
 
-        // Store the hash ID so it can not be used again
-        Redis::sadd('meta:hashid', $hash);
-
-        $url = sprintf('https://%s/%s', $request->getHost(), $hash);
-
-        $mimeArray = explode("/", $mime);
-        if (in_array($mimeArray[1] ?? null, ['jpeg', 'png', 'pdf'])) {
-            $url .= "." . $mimeArray[1];
+                $paste = Paste::create([
+                    'hash' => $hash,
+                    'content' => $content,
+                    'mime' => $request->get('mime'),
+                    'ttl' => $request->get('ttl') ?? round($retention, 0)
+                ]);
+            }
+        } catch (\Exception $e) {
+            abort(500, $e->getMessage());
         }
 
 		$response = [
-            'status' => $status[0],
-            'message' => $status[1],
-            'length' => strlen($content),
-            'size' => $this->formatBytes(strlen($content)),
+            'status' => 'ok',
+            'type' => $paste->type,
+            'length' => $paste->length,
+            'size' =>  $paste->size,
             'mime' => $mime ?? 'text/plain',
-            'ttl' => Redis::ttl($hash),
-            'ttl_d' => round(Redis::ttl($hash) / (3600*24), 1),
-            'is_link' => $is_link,
-            'url' => $url
+            'ttl' => Redis::ttl($paste->hash),
+            'retention' => round($paste->ttl / (3600*24), 1),
+            'url' => $paste->url
         ];
 
-        \Log::info('Paste successfully created', ['paste' => $hash]);
+        \Log::info('Paste created', ['paste' => $paste->hash]);
 
         return response()->json($response, 201);
     }
@@ -112,84 +99,50 @@ class PasteController extends Controller
     }
 
 
-    public function stats()
-    {
-        $dates = [
-            date('Y-m', strtotime('0 month')),
-            date('Y-m', strtotime('-1 month')),
-            date('Y-m', strtotime('-2 month')),
-        ];
-
-        $traffic = [];
-        foreach($dates as $date) {
-            $traffic[$date] = $this->formatBytes(Redis::zscore('meta:traffic', $date));
-        }
-
-        $stats = [
-            'paste_count' => Redis::dbsize() > 6 ? Redis::dbsize() - 6 : 0,
-            'link_count' => Redis::hlen('urls:hashid'),
-            'used_keys' => Redis::scard('meta:hashid'),
-            'traffic' => $traffic
-        ];
-
-        $content = json_encode($stats, JSON_PRETTY_PRINT);
-        $syntax = 'json';
-
-        return response(view('paste', compact('content', 'syntax')));
-    }
-
-
-    public function show(Request $request, $hash, $syntax = null)
+    public function show(Request $request, $hash)
     {
         $hash = explode(".", $hash)[0];
 
-        $meta = Redis::get($hash);
-        $link = Redis::hget('urls:hashid', $hash);
-        if (is_null($meta) && is_null($link)) abort(404);
+        // Use the first query string variable as syntax
+        $query = array_keys($request->all());
+        $syntax = $query[0] ?? null;
 
-        // If hash key is URL, then redirect
-        if (! is_null($link)) {
-            Redis::zincrby('urls:visits', 1, $hash);
+        // Get paste and short URL
+        $paste = Paste::find($hash);
+        $shortUrl = ShortUrl::find($hash);
 
-            return redirect($link);
+        // If short URL, then redirect
+        if (! is_null($shortUrl)) {
+            Redis::zincrby('sys:visits', 1, $hash);
+
+            return redirect($shortUrl->content);
         }
 
-        // URL only domains stop here
-        $urlDomains = explode(' ', env('URL_DOMAINS'));
-        if (in_array($request->getHost(), $urlDomains)) abort(404);
-
-        // If the hash key doesn't have a file return 404
-        if (! file_exists(storage_path('app/'.$hash))) {
-            abort(404);
+        if (is_null($paste)) {
+            abort(404, 'Not found');
         }
-
-        $content = file_get_contents(storage_path('app/'.$hash));
-        $meta_json = json_decode($meta);
-        $mime = $meta_json->mime ?? null;
-        $ttl = $meta_json->ttl ?? 3600*24*180;
 
         // Store some stats
-        Redis::zincrby('meta:visits', 1, $hash);
-        Redis::zincrby('meta:traffic', strlen($content), date('Y-m'));
+        Redis::zincrby('sys:visits', 1, $hash);
+        Redis::zincrby('sys:traffic', $paste->length, date('Y-m'));
 
         // Kick back expire, if paste is volatile
         if (Redis::ttl($hash) > -1) {
-            Redis::expire($hash, $ttl);
+            Redis::expire($hash, $paste->ttl);
         }
 
-        // Return plain text, if syntax says so
-        if (in_array($syntax, ['raw', 'plain', 'text', 'nohighlight'])) {
-            return response($content, 200)
+        if (! is_null($paste->mime)) {
+            return response($paste->content, 200)
+                ->header('Content-Type', $paste->mime)
+                ->header('Cache-Control', 'public, max-age=' . 3600*24*7);
+        }
+        else if (in_array($syntax, ['raw', 'plain', 'text'])) {
+            return response($paste->content, 200)
                 ->header('Content-Type', 'text/plain')
                 ->header('Cache-Control', 'public, max-age=' . 3600*24*7);
         }
-        else if (! is_null($mime)) {
-            return response($content, 200)
-                ->header('Content-Type', $mime)
-                ->header('Cache-Control', 'public, max-age=' . 3600*24*7);
-        }
 
-        return response(view('paste', compact('content', 'syntax')))
+        return response(view('paste', ['content' => $paste->content, 'syntax' => $syntax]))
             ->header('Cache-Control', 'public, max-age=' . 3600*24*7);
     }
 

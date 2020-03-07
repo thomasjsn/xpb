@@ -15,7 +15,7 @@ class Controller extends BaseController
 		while(1)
 		{
             $hash = $this->generateString($permitted_chars, $length);
-            if (! Redis::exists($hash) && ! Redis::sismember('meta:hashid', $hash)) return $hash;
+            if (! Redis::exists($hash) && ! Redis::sismember('sys:hashid', $hash)) return $hash;
 			$length++;
 		}
 	}
@@ -34,16 +34,8 @@ class Controller extends BaseController
     }
 
 
-    protected function formatBytes($bytes, $precision = 2) {
-        $units = array('B', 'KiB', 'MiB', 'GiB', 'TiB');
-
-        $bytes = max($bytes, 0);
-        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
-        $pow = min($pow, count($units) - 1);
-
-        $bytes /= pow(1024, $pow);
-
-        return round($bytes, $precision) . ' ' . $units[$pow];
+    protected function isValidHash($str) {
+        return !preg_match('/[^A-Za-z0-9_\/\-]/', $str);
     }
 
 }

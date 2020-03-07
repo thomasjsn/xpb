@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\ShortUrl;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Redis;
 
 class UrlDeleteCommand extends Command
 {
@@ -12,7 +12,9 @@ class UrlDeleteCommand extends Command
      *
      * @var string
      */
-    protected $signature = "url:del {hash : Hash key to delete} {--release : Release hash key}";
+    protected $signature = "url:del
+                            {hash : Hash key to delete}
+                            {--release : Release hash key}";
 
     /**
      * The console command description.
@@ -30,20 +32,10 @@ class UrlDeleteCommand extends Command
     public function handle()
     {
         $hash = $this->argument('hash');
-        $url = Redis::hget('urls:hashid', $hash);
 
-        if(Redis::hdel('urls:hashid', $hash)) {
-            $this->info('URL hashid deleted.');
-        }
-        if(Redis::zrem('urls:visits', $hash)) {
-            $this->info('URL visits deleted.');
-        }
-        if(Redis::hdel('urls:chksum', md5($url))) {
-            $this->info('URL checksum deleted.');
-        }
+        $shortUrl = ShortUrl::find($hash);
+        $result = $shortUrl->delete($this->option('release'));
 
-        if($this->option('release') && Redis::srem('meta:hashid', $hash)) {
-            $this->info('Hash key released.');
-        }
+        $this->info('Deleted: ' . implode(', ', array_keys($results)));
     }
 }

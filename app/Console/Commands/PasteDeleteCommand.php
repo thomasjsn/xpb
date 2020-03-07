@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Paste;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Redis;
 
 class PasteDeleteCommand extends Command
 {
@@ -12,7 +12,9 @@ class PasteDeleteCommand extends Command
      *
      * @var string
      */
-    protected $signature = "paste:del {hash : Hash key to delete} {--release : Release hash key}";
+    protected $signature = "paste:del
+                            {hash : Hash key to delete}
+                            {--release : Release hash key}";
 
     /**
      * The console command description.
@@ -31,21 +33,9 @@ class PasteDeleteCommand extends Command
     {
         $hash = $this->argument('hash');
 
-        if (file_exists(storage_path('app/'.$hash))) {
-            if(unlink(storage_path('app/'.$hash))) {
-                $this->info('Content file deleted.');
-            }
-        }
+        $paste = Paste::find($hash);
+        $results = $paste->delete($this->option('release'));
 
-        if(Redis::del($hash)) {
-            $this->info('Paste metadata deleted.');
-        }
-        if(Redis::zrem('meta:visits', $hash)) {
-            $this->info('Paste visits deleted.');
-        }
-
-        if($this->option('release') && Redis::srem('meta:hashid', $hash)) {
-            $this->info('Hash key released.');
-        }
+        $this->info('Deleted: ' . implode(', ', array_keys($results)));
     }
 }

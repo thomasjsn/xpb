@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\ShortUrl;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
 
@@ -29,15 +30,21 @@ class UrlListCommand extends Command
      */
     public function handle()
     {
-        $hgetall = Redis::hgetall('urls:hashid');
+        $hgetall = Redis::hgetall('sys:shorturl');
+        $shortUrls = [];
 
-        $urls = array_map(function ($hash, $url) {
-            $visits = Redis::zscore('urls:visits', $hash);
+        foreach ($hgetall as $hash => $url)
+        {
+            $shortUrl = ShortUrl::Find($hash);
 
-            return ['hash' => $hash, 'url' => $url, 'hits' => $visits];
-        }, array_keys($hgetall), $hgetall);
+            $shortUrls[] = [
+                'hash' => $shortUrl->hash,
+                'url' => $shortUrl->content,
+                'hits' => $shortUrl->hits
+            ];
+        }
 
         $headers = ['Hash', 'URL', 'Hits'];
-        $this->table($headers, $urls);
+        $this->table($headers, $shortUrls);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Paste;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
 
@@ -31,24 +32,20 @@ class PasteCheckCommand extends Command
     {
         $files = scandir(storage_path('app'));
 
-        foreach ($files as $file)
+        foreach ($files as $hash)
         {
-            if (!in_array($file, ['.', '..', '.gitignore'])) {
-                if (! Redis::exists($file)) {
-                    $this->info('Paste expired: ' . $file);
-                    $this->call('paste:del', ['hash' => $file]);
+            $hash = str_replace('!', '/', $hash);
+
+            if (! in_array($hash, ['.', '..', '.gitignore'])) {
+                if (! Redis::exists($hash)) {
+                    $results = Paste::cleanup($hash);
+
+                    $this->info(
+                        sprintf('%s expired, deleted: %s', $hash, implode(', ', array_keys($results)))
+                    );
                 }
             } 
         }
 
-        $pastes = Redis::smembers('meta:hashid');
-
-        foreach ($pastes as $paste)
-        {
-            if (Redis::exists($paste) && ! file_exists(storage_path('app/'.$paste))) {
-                $this->info('File missing expired: ' . $paste);
-                $this->call('paste:del', ['hash' => $paste]);
-            }
-        }
     }
 }
