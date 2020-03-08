@@ -49,18 +49,31 @@ class Handler extends ExceptionHandler
     {
         if ($exception instanceof NotFoundHttpException || $exception instanceof MethodNotAllowedHttpException)
         {
-            return response()->json([
+            $response = [
                 'status' => 'error',
-                'error' => 404,
-                'message' => 'Not found'
-            ], 404);
+                'code' => 404,
+                'error' => config('xpb.errors.404'),
+                'message' => $exception->getMessage()
+            ];
+
+            $content = json_encode($response, JSON_PRETTY_PRINT);
+            $syntax = 'json';
+    
+            return response(view('paste', compact('content', 'syntax')));
+
+            // return response()->json([
+            //     'status' => 'error',
+            //     'error' => 404,
+            //     'message' => 'Not found'
+            // ], 404);
         }
 
         if ($exception instanceof HttpException)
         {
             return response()->json([
                 'status' => 'error',
-                'error' => $exception->getStatusCode(),
+                'code' => $exception->getStatusCode(),
+                'error' => config('xpb.errors')[$exception->getStatusCode()],
                 'message' => $exception->getMessage()
             ], $exception->getStatusCode());
         }

@@ -8,16 +8,11 @@ use Illuminate\Support\Facades\Redis;
 
 class StatsController extends Controller
 {
-    public function index()
+    public function show()
     {
-        $dates = [
-            date('Y-m', strtotime('0 month')),
-            date('Y-m', strtotime('-1 month')),
-            date('Y-m', strtotime('-2 month')),
-        ];
-
         $traffic = [];
-        foreach($dates as $date) {
+        for ($x = 0; $x >= -2; $x--) {
+            $date = date('Y-m', strtotime($x . ' month'));
             $traffic[$date] = Helper::formatBytes(Redis::zscore('sys:traffic', $date));
         }
 
@@ -27,9 +22,11 @@ class StatsController extends Controller
         }
 
         $stats = [
-            'paste_count' => Redis::dbsize() - $ignoreCount,
-            'link_count' => Redis::hlen('sys:shorturl'),
-            'used_keys' => Redis::scard('sys:hashid'),
+            'counts' => [
+                'pastes' => Redis::dbsize() - $ignoreCount,
+                'short_urls' => Redis::hlen('sys:shorturl'),
+            ],
+            'keys' => [ 'depleted' => Redis::scard('sys:hashid') ],
             'traffic' => $traffic
         ];
 

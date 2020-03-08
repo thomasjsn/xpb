@@ -12,10 +12,10 @@
 */
 
 $router->get('/', [ 'uses' => 'PasteController@index' ]);
-$router->get('/stats', [ 'uses' => 'StatsController@index' ]);
+$router->get('/stats', [ 'uses' => 'StatsController@show' ]);
 
 # Show
 $router->get('/{hash:.*}', [ 'uses' => 'PasteController@show' ]);
 
 # Upload
-$router->post('/paste', [ 'uses' => 'PasteController@create' ]);
+$router->post('/paste', [ 'uses' => 'PasteController@store' ]);

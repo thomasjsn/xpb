@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Paste;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Redis;
 
 class PasteCheckCommand extends Command
 {
@@ -37,7 +36,7 @@ class PasteCheckCommand extends Command
             $hash = str_replace('!', '/', $hash);
 
             if (! in_array($hash, ['.', '..', '.gitignore'])) {
-                if (! Redis::exists($hash)) {
+                if (is_null(Paste::find($hash))) {
                     $results = Paste::cleanup($hash);
 
                     $this->info(

@@ -20,7 +20,7 @@ class PasteController extends Controller
     }
 
 
-    public function create(Request $request)
+    public function store(Request $request)
     {
         if (! Redis::hexists('sys:apikey', $request->header('X-API-Key'))) {
             abort(403, 'Incorrect or missing API key');
@@ -32,15 +32,14 @@ class PasteController extends Controller
         $hlen = $request->get('hlen') ?? 6;
         $hash = $request->get('hash') ?? $this->getNewHash($hlen);
 
+        if ($request->has('prefix')) {
+            $hash = $request->get('prefix') . '/' . $hash;
+        }
+
         // Limits
         $min_age = config('xpb.limits.min_age');
         $max_age = config('xpb.limits.max_age');
         $max_size = config('xpb.limits.max_size');
-
-        // Make sure hash is available
-        if (Redis::exists($hash) || Redis::sismember('sys:hashid', $hash)) {
-            abort(409, 'Hash already exists');
-        }
 
         // Make sure pasts are not too big
         if (strlen($content) > $max_size || strlen($content) == 0) {
@@ -49,7 +48,12 @@ class PasteController extends Controller
 
         // Check hash is valid
         if (! $this->isValidHash($hash)) {
-            abort(400, 'Hash contains invalid character(s)');
+            abort(422, 'Hash contains invalid character(s)');
+        }
+
+        // Make sure hash is available
+        if (Redis::exists($hash) || Redis::sismember('sys:hashid', $hash)) {
+            abort(409, 'Hash already exists');
         }
 
         $is_link = (bool)filter_var(trim($content), FILTER_VALIDATE_URL);
@@ -82,8 +86,8 @@ class PasteController extends Controller
             'length' => $paste->length,
             'size' =>  $paste->size,
             'mime' => $paste->mime ?? 'text/plain',
-            'ttl' => Redis::ttl($paste->hash),
-            'retention' => round($paste->ttl / (3600*24), 1),
+            'ttl' => ! is_null($paste->ttl) ? $paste->ttl->diffInSeconds() : null,
+            'retention' => ! is_null($paste->ttl) ? $paste->retention->diffInDays() : null,
             'url' => $paste->url
         ];
 
@@ -119,7 +123,7 @@ class PasteController extends Controller
         }
 
         if (is_null($paste)) {
-            abort(404);
+            abort(404, 'Invalid hash key, no content found');
         }
 
         // Store some stats

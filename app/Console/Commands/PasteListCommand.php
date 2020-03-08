@@ -3,9 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Paste;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Redis;
 
 class PasteListCommand extends Command
 {
@@ -48,9 +46,9 @@ class PasteListCommand extends Command
                     'length' => $paste->length,
                     'size' => $paste->size,
                     'mime' => $paste->mime ?? '-',
-                    'ttl' => round(Redis::ttl($paste->hash) / (3600*24), 1),
-                    'retention' => round($paste->ttl / (3600*24), 1),
-                    'timestamp' => Carbon::createFromTimestamp($paste->timestamp)->diffForHumans(),
+                    'ttl' => ! is_null($paste->ttl) ? $paste->ttl->diffInDays() : '-',
+                    'retention' => ! is_null($paste->ttl) ? $paste->retention->diffInDays() : '-',
+                    'timestamp' => $paste->timestamp->diffForHumans(),
                     'hits' => $paste->hits
                 ];
             } 

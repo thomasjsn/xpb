@@ -1,7 +1,11 @@
 # xpb
-xpb is a pretty simple pastebin and URL shortener, built with [Lumen](https://lumen.laravel.com/).
+__xpb__ is a pretty simple pastebin and URL shortener, built with [Lumen](https://lumen.laravel.com/).
 
-> This is still very much a work in progress, use at own risk.
+It can receive and return all types of data, text or binary. It has no special logic for types of data, and doesn't understand what the data is. If the MIME type is specified when uploading, it will be set as content-type when serving the data.
+
+This makes __xpb__ very flexible — you can upload simple text pastes, and have them displayed as code with syntax highlighting. Or you can upload and serve files; with custom pasts and filenames. This means that it is possible for __xpb__ to host websites.
+
+For MIME types listed in `config/xpb.php` the file extension will be added to the URL, this is only to indicate to the user that it's a file, or a certain type. It has no effect, in fact everything after the `.` is simply stripped.
 
 ## Features
 * Redis database
@@ -33,10 +37,11 @@ Headers:
 
 Parameters:
 * `file`: paste content (required)
+* `hash`: set custom hash key, allowed characters: [A-Za-z0-9_/-]
+* `prefix`: adds `prefix/` in front of the hash key
 * `mime`: specify content mime, like `image/jpeg`
 * `ttl`: set time to live, in seconds
 * `hlen`: hash key length, default: 6
-* `hash`: set custom hash key, allowed characters: [A-Za-z0-9_/-]
 
 ### Alias
 Put this in your `.bashrc` or `.zshrc`:
@@ -88,10 +93,11 @@ import argparse, sys, requests, json
 
 parser=argparse.ArgumentParser()
 
+parser.add_argument('--hash', help='Set custom hash key')
+parser.add_argument('--prefix', help='Add prefix/ to hash key')
 parser.add_argument('--mime', help='Specify content mime')
 parser.add_argument('--ttl', help='Content expire, 0 = never')
 parser.add_argument('--hlen', help='Set hash key length')
-parser.add_argument('--hash', help='Set custom hash key')
 
 args=parser.parse_args()
 

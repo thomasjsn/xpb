@@ -3,6 +3,7 @@
 namespace App;
 
 use App\XpbContract;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Redis;
 
 class Paste extends Model implements XpbContract
@@ -10,7 +11,7 @@ class Paste extends Model implements XpbContract
     public $hash;
     public $content;
     public $mime;
-    public $ttl;
+    protected $ttl;
     public $type = 'paste';
 
 
@@ -115,6 +116,31 @@ class Paste extends Model implements XpbContract
 
     protected function getTimestamp()
     {
-        return filectime($this->getFileName());
+        $timestamp = filectime($this->getFileName());
+
+        return Carbon::createFromTimestamp($timestamp);
     }
+
+
+    protected function getTtl()
+    {
+        $ttl = Redis::ttl($this->hash);
+
+        if ($ttl < 0 ) {
+            return null;
+        }
+
+        return Carbon::now()->addSeconds(Redis::ttl($this->hash));
+    }
+
+
+    protected function getRetention()
+    {
+        if ($this->ttl == 0) {
+            return null;
+        }
+
+        return Carbon::now()->addSeconds($this->ttl);
+    }
+
 }
