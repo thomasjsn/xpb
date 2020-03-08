@@ -81,7 +81,7 @@ class PasteController extends Controller
             'type' => $paste->type,
             'length' => $paste->length,
             'size' =>  $paste->size,
-            'mime' => $mime ?? 'text/plain',
+            'mime' => $paste->mime ?? 'text/plain',
             'ttl' => Redis::ttl($paste->hash),
             'retention' => round($paste->ttl / (3600*24), 1),
             'url' => $paste->url
@@ -119,7 +119,7 @@ class PasteController extends Controller
         }
 
         if (is_null($paste)) {
-            abort(404, 'Not found');
+            abort(404);
         }
 
         // Store some stats

@@ -33,9 +33,9 @@ class Model
     {
         $url = sprintf('%s/%s', config('app.url'), $this->hash);
 
-        $mimeArray = explode("/", $this->mime);
-        if (in_array($mimeArray[1] ?? null, ['jpeg', 'png', 'pdf'])) {
-            $url .= "." . $mimeArray[1];
+        $mimes = config('xpb.mimes');
+        if (in_array($this->mime, array_keys($mimes))) {
+            $url .= "." . $mimes[$this->mime];
         }
 
         return $url;

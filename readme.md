@@ -36,7 +36,7 @@ Parameters:
 * `mime`: specify content mime, like `image/jpeg`
 * `ttl`: set time to live, in seconds
 * `hlen`: hash key length, default: 6
-* `hash`: set custom hash key
+* `hash`: set custom hash key, allowed characters: [A-Za-z0-9_/-]
 
 ### Alias
 Put this in your `.bashrc` or `.zshrc`:
@@ -67,7 +67,7 @@ Response:
 ```
 
 ### Image upload
-Upload image with 7 days TTL, copy url to clipboard.
+Upload image with MIME, copy url to clipboard.
 
 ```
 IMG=$1

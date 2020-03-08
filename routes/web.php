@@ -15,7 +15,7 @@ $router->get('/', [ 'uses' => 'PasteController@index' ]);
 $router->get('/stats', [ 'uses' => 'StatsController@index' ]);
 
 # Show
-$router->get('/{hash:[A-Za-z0-9_/-]+}', [ 'uses' => 'PasteController@show' ]);
+$router->get('/{hash:.*}', [ 'uses' => 'PasteController@show' ]);
 
 # Upload
 $router->post('/paste', [ 'uses' => 'PasteController@create' ]);

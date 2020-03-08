@@ -9,12 +9,33 @@ return [
     ],
 
     'keys' => [
+        // HASH : API keys with comments
         'sys:apikey',
+
+        // SET : expired and current keys, remove when released
         'sys:hashid',
+
+        // SORTED SET : hits for pastes and short urls
         'sys:visits',
+
+        // SORTED SET : traffic pr month by pastes
         'sys:traffic',
+
+        // HASH : short url keys and locations
         'sys:shorturl',
+
+        // HASH : content checksum and corresponding key
         'sys:chksum'
+    ],
+
+    'mimes' => [
+        'image/gif' => 'gif',
+        'image/jpeg' => 'jpeg',
+        'image/png' => 'png',
+        'text/css' => 'css',
+        'text/javascript' => 'js',
+        'application/json' => 'json',
+        'application/pdf' => 'pdf'
     ]
     
 ];
