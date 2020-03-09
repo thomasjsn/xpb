@@ -60,12 +60,6 @@ class Handler extends ExceptionHandler
             $syntax = 'json';
     
             return response(view('paste', compact('content', 'syntax')));
-
-            // return response()->json([
-            //     'status' => 'error',
-            //     'error' => 404,
-            //     'message' => 'Not found'
-            // ], 404);
         }
 
         if ($exception instanceof HttpException)

@@ -8,6 +8,10 @@ return [
         'max_size' => 1024*1024*8
     ],
 
+    'cache' => [
+        'max-age' => 3600*24*7
+    ],
+
     'keys' => [
         // HASH : API keys with comments
         'sys:apikey',

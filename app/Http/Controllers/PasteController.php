@@ -132,22 +132,22 @@ class PasteController extends Controller
 
         // Kick back expire, if paste is volatile
         if (Redis::ttl($hash) > -1) {
-            Redis::expire($hash, $paste->ttl);
+            Redis::expire($hash, $paste->retention->diffInSeconds());
         }
 
         if (! is_null($paste->mime)) {
             return response($paste->content, 200)
                 ->header('Content-Type', $paste->mime)
-                ->header('Cache-Control', 'public, max-age=' . 3600*24*7);
+                ->header('Cache-Control', 'public, max-age=' . config('xpb.cache.max-age'));
         }
         else if (in_array($syntax, ['raw', 'plain', 'text'])) {
             return response($paste->content, 200)
                 ->header('Content-Type', 'text/plain')
-                ->header('Cache-Control', 'public, max-age=' . 3600*24*7);
+                ->header('Cache-Control', 'public, max-age=' . config('xpb.cache.max-age'));
         }
 
         return response(view('paste', ['content' => $paste->content, 'syntax' => $syntax]))
-            ->header('Cache-Control', 'public, max-age=' . 3600*24*7);
+            ->header('Cache-Control', 'public, max-age=' . config('xpb.cache.max-age'));
     }
 
 }
