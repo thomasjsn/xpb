@@ -33,6 +33,7 @@ class StatsController extends Controller
         $content = json_encode($stats, JSON_PRETTY_PRINT);
         $syntax = 'json';
 
-        return response(view('paste', compact('content', 'syntax')));
+        return response(view('paste', compact('content', 'syntax')))
+            ->header('X-Robots-Tag', 'noindex');
     }
 }

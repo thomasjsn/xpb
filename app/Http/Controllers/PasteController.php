@@ -138,16 +138,19 @@ class PasteController extends Controller
         if (! is_null($paste->mime)) {
             return response($paste->content, 200)
                 ->header('Content-Type', $paste->mime)
-                ->header('Cache-Control', 'public, max-age=' . config('xpb.cache.max-age'));
+                ->header('Cache-Control', 'public, max-age=' . config('xpb.cache.max-age'))
+                ->header('X-Robots-Tag', 'noindex');
         }
         else if (in_array($syntax, ['raw', 'plain', 'text'])) {
             return response($paste->content, 200)
                 ->header('Content-Type', 'text/plain')
-                ->header('Cache-Control', 'public, max-age=' . config('xpb.cache.max-age'));
+                ->header('Cache-Control', 'public, max-age=' . config('xpb.cache.max-age'))
+                ->header('X-Robots-Tag', 'noindex');
         }
 
         return response(view('paste', ['content' => $paste->content, 'syntax' => $syntax]))
-            ->header('Cache-Control', 'public, max-age=' . config('xpb.cache.max-age'));
+            ->header('Cache-Control', 'public, max-age=' . config('xpb.cache.max-age'))
+            ->header('X-Robots-Tag', 'noindex');
     }
 
 }
