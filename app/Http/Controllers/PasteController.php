@@ -26,8 +26,12 @@ class PasteController extends Controller
             abort(403, 'Incorrect or missing API key');
         }
 
-        $file = $request->file('file');
-        $content = trim(file_get_contents($file));
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $content = trim(file_get_contents($file));
+        } else {
+            $content = null;
+        }
 
         $hlen = $request->get('hlen') ?? 6;
         $hash = $request->get('hash') ?? $this->getNewHash($hlen);
