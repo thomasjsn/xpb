@@ -37,7 +37,7 @@ Headers:
 
 Parameters:
 * `file`: paste content (required)
-* `hash`: set custom hash key, allowed characters: [A-Za-z0-9_/-]
+* `hash`: set custom hash key, allowed characters: `[A-Za-z0-9_/-]`
 * `prefix`: adds `prefix/` in front of the hash key
 * `mime`: specify content mime, like `image/jpeg`
 * `ttl`: set time to live, in seconds
@@ -45,7 +45,7 @@ Parameters:
 
 ### Alias
 Put this in your `.bashrc` or `.zshrc`:
-```
+```bash
 xpb () {
   curl -s -H "X-API-Key: key" -F "file=@${1:--}" https://example.com/paste | jq
 }
@@ -58,12 +58,12 @@ $ cat rpi-project.py | xpb
 ```
 
 Response:
-```
+```json
 {
   "status": "ok",
   "type": "paste",
   "length": 1759,
-  "size": "1.72 KiB"
+  "size": "1.72 KiB",
   "mime": "text/plain",
   "ttl": 15552000,
   "retention": 180,
@@ -74,7 +74,7 @@ Response:
 ### Image upload
 Upload image with MIME, copy url to clipboard.
 
-```
+```bash
 IMG=$1
 MIME=`file -b --mime-type "$IMG"`
 
@@ -88,7 +88,7 @@ echo $URL | jq -r .url | xclip -i -sel clipboard
 ### Python script
 Usage: `echo "test" | xpb.py --ttl 0`
 
-```
+```python
 import argparse, sys, requests, json
 
 parser=argparse.ArgumentParser()
@@ -111,7 +111,6 @@ r = requests.post(url,
         )
 
 print(json.dumps(r.json(), indent=2))
-
 ```
 
 ## Change syntax language
@@ -131,7 +130,7 @@ List of available languages here: https://github.com/highlightjs/highlight.js/bl
 ## Retention
 Retention is calculated with this formula, from https://0x0.st/
 
-   retention = min_age + (-max_age + min_age) * pow((file_size / max_size - 1), 3)
+    retention = min_age + (-max_age + min_age) * pow((file_size / max_size - 1), 3)
 
 Pastes are set to expire according to the above calculation after initial post, unless `ttl` is set in POST request. This is kicked back each time the paste is viewed (unless the paste is persistent).
 
@@ -154,8 +153,11 @@ server {
 }
 ```
 
-## License
-xpb is open-sourced software licensed under the [MIT license](LICENSE).
-
 ## Author
-[Thomas Jensen](https://thomas.stdout.no)
+**Thomas Jensen**
+* Twitter: [@thomasjsn](https://twitter.com/thomasjsn)
+* Github: [@thomasjsn](https://github.com/thomasjsn)
+* Website: [cavelab.dev](https://cavelab.dev)
+
+## License
+The MIT License (MIT). Please see [license file](LICENSE.txt) for more information.
