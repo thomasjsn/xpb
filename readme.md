@@ -47,7 +47,7 @@ Parameters:
 Put this in your `.bashrc` or `.zshrc`:
 ```
 xpb () {
-  curl -s H "X-API-Key=key" -F "file=@${1:--}" https://example.com/paste | jq
+  curl -s -H "X-API-Key: key" -F "file=@${1:--}" https://example.com/paste | jq
 }
 ```
 Package `jq` required for json decoding.
