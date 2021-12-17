@@ -78,7 +78,7 @@ Upload image with MIME, copy url to clipboard.
 IMG=$1
 MIME=`file -b --mime-type "$IMG"`
 
-URL=`curl -s -H "X-API-Key=key" -F "file=@$IMG" -F "mime=$MIME" \
+URL=`curl -s -H "X-API-Key: key" -F "file=@$IMG" -F "mime=$MIME" \
     https://example.com/paste`
 
 echo $URL | jq
@@ -134,6 +134,25 @@ Retention is calculated with this formula, from https://0x0.st/
    retention = min_age + (-max_age + min_age) * pow((file_size / max_size - 1), 3)
 
 Pastes are set to expire according to the above calculation after initial post, unless `ttl` is set in POST request. This is kicked back each time the paste is viewed (unless the paste is persistent).
+
+## nginx config
+```nginx
+server {
+  listen 80;
+  server_name _;
+  root /var/www/xpb/public;
+  index index.php;
+
+  location ~ \.php$ {
+    include snippets/fastcgi-php.conf;
+    fastcgi_pass unix:/run/php/php7.4-fpm.sock;
+  }
+
+  location / {
+    try_files $uri $uri/ /index.php?$query_string;
+  }
+}
+```
 
 ## License
 xpb is open-sourced software licensed under the [MIT license](LICENSE).
