@@ -28,7 +28,7 @@ class PasteController extends Controller
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $content = trim(file_get_contents($file));
+            $content = file_get_contents($file);
         } else {
             $content = null;
         }
@@ -142,6 +142,7 @@ class PasteController extends Controller
         if (! is_null($paste->mime)) {
             return response($paste->content, 200)
                 ->header('Content-Type', $paste->mime)
+                ->header('Content-Length', $paste->length)
                 ->header('Cache-Control', 'public, max-age=' . config('xpb.cache.max-age'))
                 ->header('X-Robots-Tag', 'noindex');
         }
@@ -152,7 +153,7 @@ class PasteController extends Controller
                 ->header('X-Robots-Tag', 'noindex');
         }
 
-        return response(view('paste', ['content' => $paste->content, 'syntax' => $syntax]))
+        return response(view('paste', ['content' => trim($paste->content), 'syntax' => $syntax]))
             ->header('Cache-Control', 'public, max-age=' . config('xpb.cache.max-age'))
             ->header('X-Robots-Tag', 'noindex');
     }

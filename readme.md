@@ -9,11 +9,11 @@ For MIME types listed in `config/xpb.php` the file extension will be added to th
 
 ## Features
 * Redis database
-* Pasts expire if not access within TTL setting
+* Pastes expire if not accessed within TTL setting
 * Syntax highlighting with overrideable language
 
 ## Requirements
-* PHP >= 7.1.3
+* PHP >= 7.3
 * nginx (not tested with Apache)
 * Redis-server
 

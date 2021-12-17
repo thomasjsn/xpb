@@ -3,9 +3,9 @@
 return [
 
     'limits' => [
-        'min_age' => 3600*24*7,
-        'max_age' => 3600*24*180,
-        'max_size' => 1024*1024*8
+        'min_age' => 3600*24*7,     // days
+        'max_age' => 3600*24*180,   // days
+        'max_size' => 1024*1024*64  // MB
     ],
 
     'cache' => [
@@ -39,7 +39,8 @@ return [
         'text/css' => 'css',
         'text/javascript' => 'js',
         'application/json' => 'json',
-        'application/pdf' => 'pdf'
+        'application/pdf' => 'pdf',
+        'video/mp4' => 'mp4'
     ],
 
     'errors' => [
