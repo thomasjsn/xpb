@@ -69,7 +69,7 @@ class Handler extends ExceptionHandler
             return response()->json([
                 'status' => 'error',
                 'code' => $exception->getStatusCode(),
-                'error' => config('xpb.errors')[$exception->getStatusCode()],
+                'error' => config('xpb.errors')[$exception->getStatusCode()] ?? 'Error ' . $exception->getStatusCode(),
                 'message' => $exception->getMessage()
             ], $exception->getStatusCode());
         }
