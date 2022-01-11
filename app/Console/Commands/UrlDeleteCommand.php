@@ -34,7 +34,7 @@ class UrlDeleteCommand extends Command
         $hash = $this->argument('hash');
 
         $shortUrl = ShortUrl::find($hash);
-        $result = $shortUrl->delete($this->option('release'));
+        $results = $shortUrl->delete($this->option('release'));
 
         $this->info('Deleted: ' . implode(', ', array_keys($results)));
     }
