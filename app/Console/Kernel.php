@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\ApiKeyAdd::class,
         Commands\ApiKeyDelete::class,
+        Commands\ApiKeyEdit::class,
         Commands\ApiKeyList::class,
         Commands\PasteCheckCommand::class,
         Commands\PasteDeleteCommand::class,
