@@ -6,8 +6,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title>{{ config('app.name') }}</title>
-        <link rel="stylesheet" href="/styles/solarized-dark.css">
-        <script src="/highlight.pack.js"></script>
+        <link rel="stylesheet" href="/styles/night-owl.min.css">
+        <script src="/highlight.min.js"></script>
 
         <style>
             pre {
@@ -16,10 +16,10 @@
         </style>
     </head>
 
-    <body bgcolor="#002b36">
+    <body bgcolor="#011627">
         <pre><code @if(!is_null($syntax)) class="{{ $syntax }}" @endif>{{ $content }}</code></pre>
 
-        <script>hljs.initHighlightingOnLoad();</script>
+        <script>hljs.highlightAll();</script>
     </body>
 
 </html>
