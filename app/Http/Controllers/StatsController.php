@@ -11,7 +11,7 @@ class StatsController extends Controller
     public function show()
     {
         $traffic = [];
-        for ($x = 0; $x >= -2; $x--) {
+        for ($x = 0; $x >= -5; $x--) {
             $date = date('Y-m', strtotime($x . ' month'));
             $traffic[$date] = Helper::formatBytes(Redis::zscore('sys:traffic', $date));
         }
