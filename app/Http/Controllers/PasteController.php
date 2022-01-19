@@ -26,9 +26,15 @@ class PasteController extends Controller
             abort(403, 'Incorrect or missing API key');
         }
 
+        $keyComment = Redis::hget('sys:apikey', $request->header('X-API-Key'));
+
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $content = file_get_contents($file);
+            $mime = $file->getMimeType();
+        } elseif ($request->has('content')) {
+            $content = $hash = $request->get('content');
+            $mime = 'text/plain';
         } else {
             $content = null;
         }
@@ -38,6 +44,10 @@ class PasteController extends Controller
 
         if ($request->has('prefix')) {
             $hash = $request->get('prefix') . '/' . $hash;
+        }
+
+        if ($request->has('mime')) {
+            $mime = $request->get('mime');
         }
 
         // Limits
@@ -76,7 +86,7 @@ class PasteController extends Controller
                 $paste = Paste::create([
                     'hash' => $hash,
                     'content' => $content,
-                    'mime' => $request->get('mime'),
+                    'mime' => $mime,
                     'ttl' => $request->get('ttl') ?? round($retention, 0)
                 ]);
             }
@@ -95,7 +105,7 @@ class PasteController extends Controller
             'url' => $paste->url
         ];
 
-        \Log::info('Paste created', ['paste' => $paste->hash]);
+        \Log::info('Paste created', ['paste' => $paste->hash, 'key' => $keyComment]);
 
         return response()->json($response, 201);
     }
@@ -109,11 +119,21 @@ class PasteController extends Controller
 
     public function show(Request $request, $hash)
     {
+        \Log::debug('Hash request', ['hash' => $hash, 'agent' => $request->header('User-Agent')]);
+
         $hash = explode(".", $hash)[0];
+
+        if (empty($hash)) {
+            abort(400, 'Invalid hash key');
+        }
 
         // Use the first query string variable as syntax
         $query = array_keys($request->all());
         $syntax = $query[0] ?? null;
+
+        if ($hash == "home") {
+            $syntax = "md";
+        }
 
         // Get paste and short URL
         $paste = Paste::find($hash);
@@ -139,14 +159,14 @@ class PasteController extends Controller
             Redis::expire($hash, $paste->retention->diffInSeconds());
         }
 
-        if (! is_null($paste->mime)) {
+        if (! is_null($paste->mime) && $paste->mime != 'text/plain') {
             return response($paste->content, 200)
                 ->header('Content-Type', $paste->mime)
                 ->header('Content-Length', $paste->length)
                 ->header('Cache-Control', 'public, max-age=' . config('xpb.cache.max-age'))
                 ->header('X-Robots-Tag', 'noindex');
         }
-        else if (in_array($syntax, ['raw', 'plain', 'text'])) {
+        else if (in_array($syntax, ['raw'])) {
             return response($paste->content, 200)
                 ->header('Content-Type', 'text/plain')
                 ->header('Cache-Control', 'public, max-age=' . config('xpb.cache.max-age'))

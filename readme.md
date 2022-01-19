@@ -36,12 +36,15 @@ Headers:
 * `X-API-Key`: API key
 
 Parameters:
-* `file`: paste content (required)
+* `file`: paste content (file)
+* `content`: alternative paste content (text)
 * `hash`: set custom hash key, allowed characters: `[A-Za-z0-9_/-]`
 * `prefix`: adds `prefix/` in front of the hash key
-* `mime`: specify content mime, like `image/jpeg`
+* `mime`: manually set content mime, like `image/jpeg`
 * `ttl`: set time to live, in seconds
 * `hlen`: hash key length, default: 6
+
+Either `file` or `content` must be set.
 
 ### Alias
 Put this in your `.bashrc` or `.zshrc`:
@@ -119,9 +122,9 @@ Add `?` and the syntax language to the paste URL:
 https://example.com/6tmitq?md
 ```
 
-Use syntax `raw`, `plain`, or `text` to return a plain text document.
+Use syntax `raw` to return a plain text document.
 
-List of available languages here: https://github.com/highlightjs/highlight.js/blob/master/SUPPORTED_LANGUAGES.md
+List of available languages [here](https://github.com/highlightjs/highlight.js/blob/main/SUPPORTED_LANGUAGES.md).
 
 ## Special keys/URLs
 * `home`: shown on the homepage
@@ -150,6 +153,36 @@ server {
   location / {
     try_files $uri $uri/ /index.php?$query_string;
   }
+}
+```
+
+## Integrations
+
+### Flameshot
+```
+flameshot gui -r | xpb
+```
+
+You will need the `xpb` [alias](#alias) for this to work.
+
+### ShareX
+```json
+{
+  "Version": "13.7.0",
+  "Name": "xpb",
+  "DestinationType": "ImageUploader, TextUploader, FileUploader, URLShortener",
+  "RequestMethod": "POST",
+  "RequestURL": "https://example.com/paste",
+  "Headers": {
+    "X-API-Key": "YOUR-API-KEY"
+  },
+  "Body": "MultipartFormData",
+  "Arguments": {
+    "content": "$input$"
+  },
+  "FileFormName": "file",
+  "URL": "$json:.url$",
+  "ErrorMessage": "$json:.message$"
 }
 ```
 
