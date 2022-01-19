@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title>{{ config('app.name') }}</title>
-        <link rel="stylesheet" href="/styles/night-owl.min.css">
+        <link rel="stylesheet" href="/styles/a11y-dark.min.css">
         <script src="/highlight.min.js"></script>
 
         <style>
@@ -16,7 +16,7 @@
         </style>
     </head>
 
-    <body bgcolor="#011627">
+    <body bgcolor="#2b2b2b">
         <pre><code @if(!is_null($syntax)) class="{{ $syntax }}" @endif>{{ $content }}</code></pre>
 
         <script>hljs.highlightAll();</script>
