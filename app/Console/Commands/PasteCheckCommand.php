@@ -43,7 +43,7 @@ class PasteCheckCommand extends Command
                         sprintf('%s expired, deleted: %s', $hash, implode(', ', array_keys($results)))
                     );
 
-                    \Log::info('%s expired, deleted: %s', $hash, implode(', ', array_keys($results)));
+                    \Log::info('Paste expired, deleted', ['hash' => $hash, 'deleted' => array_keys($results)]);
                 }
             } 
         }
